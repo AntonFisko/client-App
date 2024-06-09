@@ -40,7 +40,6 @@ class ClientViewModel(private val context: Context) : ViewModel() {
 
                     openChrome()
 
-                    // Отправка сообщения о том, что Chrome открыт
                     val chromeOpenedCommand = GestureCommand("CHROME_OPENED", 0)
                     outgoing.send(Frame.Text(Json.encodeToString(chromeOpenedCommand)))
 
