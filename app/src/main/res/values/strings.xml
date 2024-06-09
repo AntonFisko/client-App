@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Client app</string>
+    <string name="accessibility_service_description">This service allows the app to perform gestures like swipes on your behalf.</string>
 </resources>

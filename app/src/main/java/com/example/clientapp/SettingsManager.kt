@@ -6,7 +6,7 @@ import android.content.SharedPreferences
 class SettingsManager(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("client_config", Context.MODE_PRIVATE)
 
-    fun getIp(): String = prefs.getString("ip", "192.168.0.1") ?: "192.168.0.1"
+    fun getIp(): String = prefs.getString("ip", "192.168.100.221") ?: "192.168.100.221"
 
     fun getPort(): String = prefs.getString("port", "8080") ?: "8080"
 

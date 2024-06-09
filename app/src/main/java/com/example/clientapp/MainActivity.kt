@@ -1,6 +1,8 @@
 package com.example.clientapp
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -27,9 +29,16 @@ class MainActivity : ComponentActivity() {
     private val clientViewModel: ClientViewModel by viewModels {
         ClientViewModelFactory(applicationContext)
     }
-
+    private fun promptUserToEnableAccessibilityService() {
+        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        this.startActivity(intent)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        promptUserToEnableAccessibilityService()
+
         setContent {
             ClientApp(clientViewModel)
         }
@@ -38,9 +47,10 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ClientApp(viewModel: ClientViewModel) {
-    var serverIp by remember { mutableStateOf("192.168.1.100") }
-    var serverPort by remember { mutableStateOf("8080") }
-    val isConnected by viewModel.isConnected.collectAsState()
+    var ip by remember { mutableStateOf("192.168.100.211") }
+    var port by remember { mutableStateOf("8080") }
+    val isClientRunning by viewModel.isClientRunning.collectAsState()
+    val logs by viewModel.log.collectAsState()
 
     Column(
         modifier = Modifier
@@ -49,35 +59,28 @@ fun ClientApp(viewModel: ClientViewModel) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         TextField(
-            value = serverIp,
-            onValueChange = { serverIp = it },
+            value = ip,
+            onValueChange = { ip = it },
             label = { Text("Server IP") },
             modifier = Modifier.fillMaxWidth()
         )
         TextField(
-            value = serverPort,
-            onValueChange = { serverPort = it },
+            value = port,
+            onValueChange = { port = it },
             label = { Text("Server Port") },
             modifier = Modifier.fillMaxWidth()
         )
         Button(
             onClick = {
-                viewModel.connectToServer(serverIp, serverPort.toInt())
+                viewModel.connect(ip, port.toInt())
             },
-            enabled = !isConnected,
+            enabled = !isClientRunning,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Connect")
         }
-        Button(
-            onClick = {
-                viewModel.disconnectFromServer()
-            },
-            enabled = isConnected,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Disconnect")
+        logs.forEach { log ->
+            Text(text = log)
         }
-        Text(text = if (isConnected) "Connected to server" else "Not connected")
     }
 }

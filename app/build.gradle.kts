@@ -107,6 +107,8 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha05")
 
     implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+
+    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 }
 
 // Apply Hilt plugin
