@@ -35,7 +35,7 @@ class ClientViewModel(private val context: Context) : ViewModel() {
                 }
                 client?.webSocket(host = ip, port = port, path = "/ws") {
                     _isClientRunning.value = true
-                    _log.value = _log.value + "Connected to server at $ip:$port"
+                    _log.value += "Connected to server at $ip:$port"
                     Log.d("ClientViewModel", "Connected to server at $ip:$port")
 
                     openChrome()
@@ -52,7 +52,7 @@ class ClientViewModel(private val context: Context) : ViewModel() {
                     }
                 }
             } catch (e: Exception) {
-                _log.value = _log.value + "Failed to connect: ${e.localizedMessage}"
+                _log.value += "Failed to connect: ${e.localizedMessage}"
             }
         }
     }
@@ -66,19 +66,29 @@ class ClientViewModel(private val context: Context) : ViewModel() {
     }
 
     private fun handleGestureCommand(command: GestureCommand) {
-        val intent = Intent(context, GestureAccessibilityService::class.java)
+        val intent = Intent(context, GestureAccessibilityService::class.java).apply {
+            putExtra("GESTURE_COMMAND_TYPE", command.type)
+            putExtra("GESTURE_COMMAND_DURATION", command.duration)
+        }
         context.startService(intent)
+    }
 
-        when (command.type) {
-            "SWIPE_UP" -> {
-                val service = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as GestureAccessibilityService
-                service.performSwipeUp(command.duration)
-            }
-            "SWIPE_DOWN" -> {
-                val service = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as GestureAccessibilityService
-                service.performSwipeDown(command.duration)
-            }
-            else -> Log.e("ClientViewModel", "Unknown gesture command: ${command.type}")
+    fun disconnect() {
+        viewModelScope.launch(Dispatchers.IO) {
+            client?.close()
+            client = null
+            _isClientRunning.value = false
+            _log.value += "Disconnected from server"
         }
     }
+    fun shutdownServer() {
+        viewModelScope.launch(Dispatchers.IO) {
+            client?.webSocket("/ws") {
+                val shutdownCommand = GestureCommand("SHUTDOWN", 0)
+                outgoing.send(Frame.Text(Json.encodeToString(shutdownCommand)))
+                _log.value += "Sent shutdown command to server"
+            }
+        }
+    }
+
 }
