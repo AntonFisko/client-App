@@ -1,7 +1,8 @@
-package com.example.clientapp
+package com.example.clientapp.presentation.accessibility
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
+import android.content.Intent
 import android.graphics.Path
 import android.os.Build
 import android.util.Log
@@ -18,7 +19,17 @@ class GestureAccessibilityService : AccessibilityService() {
         // No-op
     }
 
-    fun performSwipeGesture(type: String, duration: Long) {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val type = intent?.getStringExtra("GESTURE_COMMAND_TYPE")
+        val duration = intent?.getLongExtra("GESTURE_COMMAND_DURATION", 1000L) ?: 1000L
+
+        if (type != null) {
+            performSwipeGesture(type, duration)
+        }
+        return START_STICKY
+    }
+
+    private fun performSwipeGesture(type: String, duration: Long) {
         val path = Path().apply {
             when (type) {
                 "SWIPE_UP" -> {
@@ -39,12 +50,12 @@ class GestureAccessibilityService : AccessibilityService() {
         dispatchGesture(gesture, object : GestureResultCallback() {
             override fun onCompleted(gestureDescription: GestureDescription?) {
                 super.onCompleted(gestureDescription)
-                Log.d("GestureService", "Gesture $type completed")
+                Log.d("GestureService", "Жест $type выполнен")
             }
 
             override fun onCancelled(gestureDescription: GestureDescription?) {
                 super.onCancelled(gestureDescription)
-                Log.d("GestureService", "Gesture $type cancelled")
+                Log.d("GestureService", "Жест $type отменен")
             }
         }, null)
     }

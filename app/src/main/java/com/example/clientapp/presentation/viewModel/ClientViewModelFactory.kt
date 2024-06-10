@@ -1,4 +1,4 @@
-package com.example.clientapp
+package com.example.clientapp.presentation.viewModel
 
 import android.content.Context
 import androidx.lifecycle.ViewModel

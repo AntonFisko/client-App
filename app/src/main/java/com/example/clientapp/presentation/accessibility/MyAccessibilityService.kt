@@ -1,22 +1,19 @@
-package com.example.clientapp
+package com.example.clientapp.presentation.accessibility
 
 import android.accessibilityservice.AccessibilityService
-import android.view.accessibility.AccessibilityEvent
-import com.example.clientapp.models.GestureCommand
-import com.example.clientapp.models.GestureResult
-
 import android.accessibilityservice.GestureDescription
 import android.graphics.Path
 import android.util.Log
+import android.view.accessibility.AccessibilityEvent
 
 class MyAccessibilityService : AccessibilityService() {
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        // Handle accessibility events if necessary
+        // Обработка событий доступности при необходимости
     }
 
     override fun onInterrupt() {
-        // Handle interrupt
+        // Обработка прерываний
     }
 
     fun performSwipeGesture(type: String, duration: Long) {
@@ -31,7 +28,7 @@ class MyAccessibilityService : AccessibilityService() {
                 path.lineTo(500f, 1500f)
             }
             else -> {
-                Log.e("MyAccessibilityService", "Unknown gesture type: $type")
+                Log.e("MyAccessibilityService", "Неизвестный тип жеста: $type")
                 return
             }
         }
@@ -43,12 +40,12 @@ class MyAccessibilityService : AccessibilityService() {
         dispatchGesture(gesture, object : GestureResultCallback() {
             override fun onCompleted(gestureDescription: GestureDescription?) {
                 super.onCompleted(gestureDescription)
-                Log.d("MyAccessibilityService", "Gesture completed")
+                Log.d("MyAccessibilityService", "Жест выполнен")
             }
 
             override fun onCancelled(gestureDescription: GestureDescription?) {
                 super.onCancelled(gestureDescription)
-                Log.d("MyAccessibilityService", "Gesture cancelled")
+                Log.d("MyAccessibilityService", "Жест отменен")
             }
         }, null)
     }

@@ -1,4 +1,4 @@
-package com.example.clientapp
+package com.example.clientapp.presentation.viewModel
 
 import android.content.Context
 import android.content.Intent
@@ -6,7 +6,8 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.clientapp.models.GestureCommand
+import com.example.clientapp.presentation.accessibility.GestureAccessibilityService
+import com.example.clientapp.domain.models.GestureCommand
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
@@ -35,8 +36,8 @@ class ClientViewModel(private val context: Context) : ViewModel() {
                 }
                 client?.webSocket(host = ip, port = port, path = "/ws") {
                     _isClientRunning.value = true
-                    _log.value += "Connected to server at $ip:$port"
-                    Log.d("ClientViewModel", "Connected to server at $ip:$port")
+                    _log.value += "Подключено к серверу на $ip:$port"
+                    Log.d("ClientViewModel", "Подключено к серверу на $ip:$port")
 
                     openChrome()
 
@@ -46,13 +47,14 @@ class ClientViewModel(private val context: Context) : ViewModel() {
                     for (message in incoming) {
                         if (message is Frame.Text) {
                             val receivedText = message.readText()
+                            Log.d("ClientViewModel", "Получено сообщение: $receivedText")
                             val command = Json.decodeFromString<GestureCommand>(receivedText)
                             handleGestureCommand(command)
                         }
                     }
                 }
             } catch (e: Exception) {
-                _log.value += "Failed to connect: ${e.localizedMessage}"
+                _log.value += "Ошибка подключения: ${e.localizedMessage}"
             }
         }
     }
@@ -78,17 +80,17 @@ class ClientViewModel(private val context: Context) : ViewModel() {
             client?.close()
             client = null
             _isClientRunning.value = false
-            _log.value += "Disconnected from server"
+            _log.value += "Отключено от сервера"
         }
     }
+
     fun shutdownServer() {
         viewModelScope.launch(Dispatchers.IO) {
             client?.webSocket("/ws") {
                 val shutdownCommand = GestureCommand("SHUTDOWN", 0)
                 outgoing.send(Frame.Text(Json.encodeToString(shutdownCommand)))
-                _log.value += "Sent shutdown command to server"
+                _log.value += "Отправлена команда выключения серверу"
             }
         }
     }
-
 }
